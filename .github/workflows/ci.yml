@@ -35,8 +35,11 @@ jobs:
         run: npm ci
 
       # Step 4: Run ESLint to check code quality
-      - name: Run Linter
-        run: npm run lint
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          eslint: true
+          prettier: true
 
 
   # =====================================
