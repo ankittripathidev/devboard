@@ -1,27 +1,68 @@
-# Goal: Build the image for DevBoard Frontend and Push to DockerHub
+# Goal: Build the DevBoard Frontend Docker image and push it to DockerHub
+
+# Workflow Name
 name: CI
 
+# Trigger: Run this workflow whenever code is pushed to the main branch
 on:
   push:
     branches:
       - main
 
+# Jobs
 jobs:
+
+  # =====================================
+  # JOB 1: Code Lint
+  # =====================================
+  code-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      # Step 3: Install project dependencies
+      - name: Install Dependencies
+        run: npm ci
+
+      # Step 4: Run ESLint to check code quality
+      - name: Run Linter
+        run: npm run lint
+
+
+  # =====================================
+  # JOB 2: Docker Build and Push
+  # =====================================
   build-and-push:
     runs-on: ubuntu-latest
+
+    # Run this job only if the code-lint job succeeds
+    needs: code-lint
+
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v7
 
+      # Step 2: Login to DockerHub
       - name: Docker Setup [Login]
         uses: docker/login-action@v4
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # Step 3: Build the Docker image and push it to DockerHub
       - name: Docker Build and Push
         uses: docker/build-push-action@v7
         with:
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-frontend:latest
-        
