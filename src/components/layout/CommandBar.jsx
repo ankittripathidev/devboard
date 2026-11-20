@@ -23,6 +23,26 @@ export function CommandBar() {
   const [cursor, setCursor] = useState(0);
   const [isMac] = useState(() => /Mac|iPhone|iPad/.test(navigator.platform));
 
+  // Clear search.
+  function clearSearch() {
+    setQuery("");
+    setResults([]);
+    setOpen(false);
+    setCursor(0);
+  }
+
+  // Handle input changes.
+  function handleQueryChange(e) {
+    const value = e.target.value;
+    setQuery(value);
+
+    if (value.trim().length < 2) {
+      setResults([]);
+      setOpen(false);
+      setCursor(0);
+    }
+  }
+
   // Cmd/Ctrl+K focus.
   useEffect(() => {
     function onKey(e) {
@@ -32,6 +52,7 @@ export function CommandBar() {
         inputRef.current?.select();
       }
     }
+
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
@@ -39,36 +60,53 @@ export function CommandBar() {
   // Debounced search.
   useEffect(() => {
     if (query.trim().length < 2) {
-      setResults([]);
       return;
     }
+
+    let cancelled = false;
+
     const timer = setTimeout(async () => {
       try {
         const { results: r } = await searchTasks(query, 1);
+
+        if (cancelled) return;
+
         setResults(r || []);
         setCursor(0);
         setOpen(true);
       } catch {
-        setResults([]);
+        if (!cancelled) {
+          setResults([]);
+        }
       }
     }, 200);
-    return () => clearTimeout(timer);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [query]);
 
   // Outside click closes.
   useEffect(() => {
     function onClick(e) {
-      if (!wrapRef.current?.contains(e.target)) setOpen(false);
+      if (!wrapRef.current?.contains(e.target)) {
+        setOpen(false);
+      }
     }
+
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
   function handleKey(e) {
     if (!open || !results.length) {
-      if (e.key === "Escape") setQuery("");
+      if (e.key === "Escape") {
+        clearSearch();
+      }
       return;
     }
+
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setCursor((c) => (c + 1) % results.length);
@@ -77,14 +115,15 @@ export function CommandBar() {
       setCursor((c) => (c - 1 + results.length) % results.length);
     } else if (e.key === "Enter") {
       e.preventDefault();
+
       const pick = results[cursor];
+
       if (pick) {
-        setOpen(false);
-        setQuery("");
+        clearSearch();
         nav("/projects/1");
       }
     } else if (e.key === "Escape") {
-      setOpen(false);
+      clearSearch();
     }
   }
 
@@ -99,17 +138,19 @@ export function CommandBar() {
           focus-within:border-accent/60 focus-within:shadow-focus`}
       >
         <IconSearch size={14} stroke={1.7} className="text-ink-400 shrink-0" />
+
         <input
           ref={inputRef}
           type="search"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={handleQueryChange}
           onFocus={() => results.length && setOpen(true)}
           onKeyDown={handleKey}
           placeholder="Search tasks, projects, or commands…"
           className="flex-1 bg-transparent outline-none text-[13px] placeholder-ink-400
             text-ink-950 dark:text-white"
         />
+
         <span
           className="font-mono text-[10px] text-ink-400 px-1.5 h-[18px] inline-flex items-center
           rounded border border-ink-100 dark:border-white/10
@@ -136,6 +177,7 @@ export function CommandBar() {
               <div className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wide font-medium text-ink-400">
                 Tasks · {results.length}
               </div>
+
               <ul>
                 {results.map((r, idx) => (
                   <li key={r.id}>
@@ -143,8 +185,7 @@ export function CommandBar() {
                       type="button"
                       onMouseEnter={() => setCursor(idx)}
                       onClick={() => {
-                        setOpen(false);
-                        setQuery("");
+                        clearSearch();
                         nav("/projects/1");
                       }}
                       className={`w-full text-left px-3 py-2 flex items-center gap-2.5 transition
@@ -157,10 +198,13 @@ export function CommandBar() {
                       <span className="font-mono text-[11px] text-ink-400 w-8 shrink-0">
                         #{r.id}
                       </span>
+
                       <span className="flex-1 min-w-0 truncate text-[13px]">
                         {r.title}
                       </span>
+
                       <StatusBadge status={r.status} />
+
                       {idx === cursor && (
                         <IconCornerDownLeft
                           size={12}
@@ -172,6 +216,7 @@ export function CommandBar() {
                   </li>
                 ))}
               </ul>
+
               <div
                 className="px-3 py-2 border-t border-ink-100 dark:border-white/10
                 flex items-center gap-3 text-[10px] text-ink-400"
@@ -182,12 +227,14 @@ export function CommandBar() {
                   </kbd>{" "}
                   navigate
                 </span>
+
                 <span className="inline-flex items-center gap-1">
                   <kbd className="font-mono px-1 rounded border border-ink-100 dark:border-white/10">
                     ↵
                   </kbd>{" "}
                   open
                 </span>
+
                 <span className="inline-flex items-center gap-1">
                   <kbd className="font-mono px-1 rounded border border-ink-100 dark:border-white/10">
                     esc
