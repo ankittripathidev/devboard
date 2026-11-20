@@ -10,7 +10,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Chaeckout Code
+      - name: Checkout Code
         uses: actions/checkout@v7
 
       - name: Docker Setup [Login]
