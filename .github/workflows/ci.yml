@@ -11,7 +11,6 @@ on:
 
 # Jobs
 jobs:
-
   # =====================================
   # JOB 1: Code Lint
   # =====================================
@@ -27,8 +26,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: '24'
-          cache: 'npm'
+          node-version: "24"
+          cache: "npm"
 
       # Step 3: Install project dependencies
       - name: Install Dependencies
@@ -38,9 +37,8 @@ jobs:
       - name: Run Linters
         uses: wearerequired/lint-action@v3
         with:
-         eslint: true
-         prettier: true
-
+          eslint: true
+          prettier: true
 
   # =====================================
   # JOB 2: Docker Build and Push
