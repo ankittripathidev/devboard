@@ -41,9 +41,9 @@ jobs:
         working-directory: ./frontend
 
       # Build
-      # - name: Build Frontend
-        # run: npm run build
-        # working-directory: ./frontend
+      - name: Build Frontend
+        run: npm run build
+        working-directory: ./frontend
 
       # Docker Login
       - name: Docker Login
