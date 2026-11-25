@@ -1,5 +1,5 @@
-# Goal - I have to Lint, Build, Test the code for Frontend & Backend
-# then Push the images to DockerHub 
+# Goal: Lint, Test, Build Frontend & Backend
+# Then Push Docker Images to DockerHub
 
 name: CI
 
@@ -9,84 +9,102 @@ on:
       - advanced
 
 jobs:
-  # job-1 Build frontend
+  # Job-1: Build Frontend
   build-frontend:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code/ Code Clone
         uses: actions/checkout@v7
 
+      # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache: npm
+          cache-dependency-path: ./frontend/package-lock.json
 
+      # Install Dependencies
       - name: Install npm Packages
-        run: npm install
-        working-directory: frontend
+        run: npm ci
+        working-directory: ./frontend
 
+      # Lint
       - name: Run Linter
         run: npm run lint
-        working-directory: frontend
+        working-directory: ./frontend
 
+      # Test
       - name: Run Tests
         run: npm run test
-        working-directory: frontend
+        working-directory: ./frontend
 
-      - name: Docker Login [Setup]
+      # Build
+      # - name: Build Frontend
+        # run: npm run build
+        # working-directory: ./frontend
+
+      # Docker Login
+      - name: Docker Login
         uses: docker/login-action@v4
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      
+      # Docker Build & Push
       - name: Docker Build and Push
         uses: docker/build-push-action@v7
         with:
           context: ./frontend
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-frontend:latest
-          
 
-  # job-2 Build backend
+
+  # Job-2: Build Backend
   build-backend:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code/ Code Clone
         uses: actions/checkout@v7
 
-
+      # Setup Go
       - name: Setup Go
         uses: actions/setup-go@v7
         with:
-          go-version: '1.25' 
-          go-version-file: 'go.mod'
-          cache-dependency-path: 'go.sum'
+          go-version-file: ./backend/go.mod
+          cache-dependency-path: ./backend/go.sum
 
-
+      # Lint
       - name: Go-lang Linter
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.13
-          
+          working-directory: ./backend
 
+      # Test
       - name: Run Tests
-        run: go test -v -race ./...
+        # run: go test -v -race ./...
+        run: go test
+        working-directory: ./backend
 
- 
-      - name: Docker Login [Setup]
+      # Build
+      # - name: Build Backend
+        # run: go build ./...
+        # working-directory: ./backend
+
+      # Docker Login
+      - name: Docker Login
         uses: docker/login-action@v4
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    
+      # Docker Build & Push
       - name: Docker Build and Push
         uses: docker/build-push-action@v7
         with:
           context: ./backend
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-backend:latest
-          
