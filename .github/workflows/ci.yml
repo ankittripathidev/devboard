@@ -76,6 +76,19 @@ jobs:
           go-version-file: ./backend/go.mod
           cache-dependency-path: ./backend/go.sum
 
+  
+       # Check Go formatting without modifying files
+      - name: Check Go Formatting
+        working-directory: ./backend
+        run: |
+          files=$(gofmt -l .)
+          if [ -n "$files" ]; then
+            echo "The following files need formatting:"
+            echo "$files"
+            exit 1
+          fi
+
+
       # Lint
       - name: Go-lang Linter
         uses: golangci/golangci-lint-action@v9
@@ -83,16 +96,20 @@ jobs:
           version: v2.13
           working-directory: ./backend
 
+       # Go Vet
+      - name: Run Go Vet
+        run: go vet ./...
+        working-directory: ./backend
+
       # Test
       - name: Run Tests
-        # run: go test -v -race ./...
-        run: go test
+        run: go test -v -race ./...
         working-directory: ./backend
 
       # Build
-      # - name: Build Backend
-        # run: go build ./...
-        # working-directory: ./backend
+      - name: Build Backend
+        run: go build ./...
+        working-directory: ./backend
 
       # Docker Login
       - name: Docker Login
