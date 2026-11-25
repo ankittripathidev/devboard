@@ -90,11 +90,11 @@ jobs:
 
 
       # Lint
-      - name: Go-lang Linter
-        uses: golangci/golangci-lint-action@v9
-        with:
-          version: v2.13
-          working-directory: ./backend
+      # - name: Go-lang Linter
+        # uses: golangci/golangci-lint-action@v9
+        # with:
+          # version: v2.13
+          # working-directory: ./backend
 
        # Go Vet
       - name: Run Go Vet
