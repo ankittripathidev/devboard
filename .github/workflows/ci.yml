@@ -9,8 +9,8 @@ on:
       - advanced
 
 jobs:
+  # job-1 Build frontend
   build-frontend:
-    # GitHub Runner
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code/ Code Clone
@@ -48,4 +48,45 @@ jobs:
           context: ./frontend
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-frontend:latest
+          
+
+  # job-2 Build backend
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code/ Code Clone
+        uses: actions/checkout@v7
+
+
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: '1.25' 
+          go-version-file: 'go.mod'
+          cache-dependency-path: 'go.sum'
+
+
+      - name: Go-lang Linter
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.13
+          
+
+      - name: Run Tests
+        run: go test -v -race ./...
+
+ 
+      - name: Docker Login [Setup]
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v7
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-backend:latest
           
