@@ -10,7 +10,7 @@ import {
 import { Avatar } from "../ui/Avatar";
 
 // No auth on the fundamentals branch — the profile shows a static demo user.
-const DEMO_USER = { name: "Ankit", email: "ankittripathi.dev@gmail.com" };
+const DEMO_USER = { name: "Ankit", email: "ankit@devboard.com" };
 
 /**
  * Right-cluster profile dropdown.
