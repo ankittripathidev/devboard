@@ -1,16 +1,26 @@
 # Goal: Lint, Test, Build Frontend & Backend
 # Then Push Docker Images to DockerHub
 
+# Workflow Name
 name: CI
 
+# Triggers On
 on:
   push:
     branches:
       - advanced
 
+
+# Minimum permissions
+permissions:
+  contents: read
+
+# Jobs
 jobs:
-  # Job-1: Build Frontend
-  build-frontend:
+  # ==========================================
+  # JOB 1: FRONTEND BUILD
+  # ==========================================
+  frontend-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -40,11 +50,6 @@ jobs:
         run: npm run test
         working-directory: ./frontend
 
-      # Build
-      # - name: Build Frontend
-        # run: npm run build
-        # working-directory: ./frontend
-
       # Docker Login
       - name: Docker Login
         uses: docker/login-action@v4
@@ -62,8 +67,10 @@ jobs:
 
 
 
-  # Job-2: Build Backend
-  build-backend:
+  # ==========================================
+  # JOB 2: BACKEND BUILD
+  # ==========================================
+  backend-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -108,11 +115,6 @@ jobs:
         run: go test -v -race ./...
         working-directory: ./backend
 
-      # Build
-      # - name: Build Backend
-        # run: go build ./...
-        # working-directory: ./backend
-
       # Docker Login
       - name: Docker Login
         uses: docker/login-action@v4
@@ -127,3 +129,15 @@ jobs:
           context: ./backend
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-backend:latest
+
+
+  # ==========================================
+  # JOB 3: DEPLOY
+  # ==========================================
+  deploy:
+    name: Deploy Application
+    needs:
+      - frontend-build
+      - backend-build
+    uses: ./.github/workflows/cd.yml
+    secrets: inherit
