@@ -74,8 +74,9 @@ ubuntu@ip-172-31-45-72:~/actions-runner$
 - Refresh it
 - self-hosted self-hosted Linux X64    Idle 
 
+
 # Step.5 Your Project Repo .github/workflows/ci.yml 
-# This is CI Part
+# This is CI Part:- Run on Github Runner (ubuntu-latest)
 ```
 # Goal: Lint, Test, Build Frontend & Backend
 # Then Push Docker Images to DockerHub
@@ -209,9 +210,53 @@ jobs:
 - docker ps
 
 
-
-
 # Step.7 Now for Self-Hosted CD (For Deployment)
+# This is CD Part:- Run on EC2 (self-hosted)
+```
+# Goal: Deploy Docker images after successful CI
+
+name: CD
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Copy Example env to Main env
+        run: cp .env.example .env
+
+      - name: Docker Login
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Deploy with Docker Compose
+        run: |
+          docker compose pull
+          docker compose up -d
 ```
 
-```
+# Step.8 Run this command from EC2 when it is not written like (Connected to GitHub) At EC2
+- cd actions-runner
+- ./run.sh
+
+# Step.9 Look they are done 
+- picture-1
+- picture-2
+
+# Step.10 Security Inbound from Ec2
+- security>>security-groups>>edit inbound rules>> (See port from .env.example)
+- FrontEnd Port:8080 (allow/ add them)
+
+# Step.11 Run On Browser 
+- Ec2@public-ip:8080
