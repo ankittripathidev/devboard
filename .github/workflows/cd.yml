@@ -5,21 +5,24 @@ name: CD
 on:
   workflow_run:
     workflows: ["CI"]
-    types: [completed]
+    types:
+      - completed
     branches: 
       - advanced
 
 jobs:
   deploy:
+   # Deploy only when CI succeeds
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
     runs-on: self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7 
-      
+
       - name: Copy Example env to Main env
         run: cp .env.example .env 
       
-      # Docker Login
       - name: Docker Setup [Login]
         uses: docker/login-action@v4
         with:
