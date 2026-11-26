@@ -1,13 +1,17 @@
 # Goal: Deploy Docker images after successful CI
 
+# Workflow Name
 name: CD
 
+# Triggers On
 on:
   workflow_call:
 
+# Minimum permissions
 permissions:
   contents: read
 
+# Jobs
 jobs:
   deploy:
     runs-on: self-hosted
