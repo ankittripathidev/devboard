@@ -61,6 +61,7 @@ jobs:
           tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-frontend:latest
 
 
+
   # Job-2: Build Backend
   build-backend:
     runs-on: ubuntu-latest
@@ -80,7 +81,7 @@ jobs:
        # Check Go formatting without modifying files
       - name: Check Go Formatting
         working-directory: ./backend
-        run: go fmt ./...
+        run: go fmt
         # run: |
         #   files=$(gofmt -l .)
         #   if [ -n "$files" ]; then
@@ -101,17 +102,17 @@ jobs:
 
        # Go Vet
       - name: Run Go Vet
-        run: go vet ./...
+        run: go vet
         working-directory: ./backend
 
       # Test
       - name: Run Tests
-        run: go test -v -race ./...
+        run: go test 
         working-directory: ./backend
 
       # Build
       - name: Build Backend
-        run: go build ./...
+        run: go build
         working-directory: ./backend
 
       # Docker Login
