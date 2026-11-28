@@ -1,0 +1,35 @@
+# Goal: Deploy Docker images after successful CI
+
+# Workflow Name
+name: CD
+
+# Triggers On
+on:
+  workflow_call:
+
+# Minimum permissions
+permissions:
+  contents: read
+
+# Jobs
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Copy Example env to Main env
+        run: cp .env.example .env
+
+      - name: Docker Login
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Deploy with Docker Compose
+        run: |
+          docker compose pull
+          docker compose up -d
